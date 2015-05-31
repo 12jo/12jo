@@ -1,11 +1,12 @@
+jqtdmsl 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <winsock2.h>
   
-#define BUFSIZE 1024
+#define BUFSIZE 1024 
   
-void ErrorHandling(char *message);
+void ErrorHandling(char *message);  
   
 int main(int argc, char **argv) {
       
@@ -21,28 +22,31 @@ int main(int argc, char **argv) {
         printf("Please, Insert Port Number\n");
         exit(1);
     }
-          
+     /*라이브러리 초기화*/     
     if(WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)        
         ErrorHandling("Load WinSock 2.2 DLL Error");  
-          
+    /*socket 생성*/
     servSock = socket(PF_INET, SOCK_STREAM, 0);
-    if(servSock == INVALID_SOCKET)
+    if(servSock == INVALID_SOCKET) 
         ErrorHandling("Socket Error");
-              
+               
+   /*주소정보 초기화*/
     memset(&servAddr, 0, sizeof(SOCKADDR_IN));
-    servAddr.sin_family = AF_INET;
-    servAddr.sin_port = htons(atoi(argv[1]));
-    servAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    servAddr.sin_family = AF_INET;  // 주소체계지정
+    servAddr.sin_port = htons(atoi(argv[1]));  //문자열 기반의 port번호 초기화
+    servAddr.sin_addr.s_addr = htonl(INADDR_ANY); //문자열 기반의 ip주소 초기화 
       
+	/*주소 정보 할당*/
     if(bind(servSock, (void *)&servAddr, sizeof(servAddr)) == SOCKET_ERROR)
         ErrorHandling("Bind Error");
-          
-    if(listen(servSock, 2) == SOCKET_ERROR)
+	
+	/*연결 요청 대기*/      
+    if(listen(servSock, 2) == SOCKET_ERROR) 
         ErrorHandling("Listen Error");        
   
     fromLen = sizeof(clntAddr);
-      
-    clntSock = accept(servSock, (void *)&clntAddr, &fromLen);
+     /*연결 요청 대기 큐에서 대기중인 클라이언트의 연결요청을 수락*/
+    clntSock = accept(servSock, (void *)&clntAddr, &fromLen); 
     if(clntSock == INVALID_SOCKET) {
         ErrorHandling("Accept Error");
     } else {
@@ -50,7 +54,7 @@ int main(int argc, char **argv) {
         printf("Start ...\n");
     }
       
-    closesocket(servSock);
+    closesocket(servSock); //소켓 닫음
       
     while(1) {
         printf("Message Receives ...\n");
@@ -74,7 +78,7 @@ int main(int argc, char **argv) {
             send(clntSock, message, (int)strlen(message), 0);
             break;
         }
-          
+        /*메시지 전송*/
         send(clntSock, message, (int)strlen(message), 0); 
     }
       
