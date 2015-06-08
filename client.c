@@ -42,6 +42,10 @@ int main(int argc,char* argv[])
  if(connect(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr))==-1)
   error_handling("connect() error");
 
+
+ fgets(msg, BUF_SIZE, stdin);
+ write(sock,msg,strlen(msg));
+ 
  pthread_create(&snd_thread, NULL, send_msg,(void*)&sock);
  pthread_create(&rcv_thread, NULL,recv_msg,(void*)&sock);
  pthread_join(snd_thread,&thread_return);

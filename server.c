@@ -13,6 +13,10 @@ void * handle_clnt(void* arg);
 void send_msg(char* msg,int len);
 void error_handling(char* msg);
 
+
+char id_in[15];
+char pw_in[15];
+   
 int clnt_cnt=0;
 int clnt_socks[MAX_CLNT];
 pthread_mutex_t mutx;
@@ -49,6 +53,10 @@ int main(int argc,char* argv[])
   clnt_adr_sz=sizeof(clnt_adr);
   clnt_sock=accept(serv_sock ,(struct sockaddr*)&clnt_adr,&clnt_adr_sz);
   
+  str_len=read(sock, id_in,sizeof(id_in)); //+ 
+ //+
+ printf("%s",id_in);
+  lo(id_in[5],pw_in[5]);
   pthread_mutex_lock(&mutx);
   clnt_socks[clnt_cnt++]=clnt_sock;
   pthread_mutex_unlock(&mutx);
@@ -99,5 +107,48 @@ void error_handling(char* message)
  fputs(message, stderr);
  fputc('\n',stderr);
  exit(1);
+}
+void lo(char id_in[5],char pw_in[5])
+{
+ struct
+{
+   char id[15];
+   char pw[15];
+   int state;//로그인 되지 않은 상태를 0으로 함
+}typedef member;
+
+   FILE *fp;
+   int n=0;
+   int i;
+   char a[15];
+   member *mem;
+
+  
+   fp = fopen("data.txt", "a");
+   while (feof(fp) == 0)
+   {
+      fscanf(fp, "%s", a);
+      n++;
+   }//저장되어있는 정보 개수
+   mem = (member*)malloc(sizeof(member)*n/3);
+   fseek(fp, 0, SEEK_SET);
+   for (i = 0; i < n / 3; i++)
+   {
+      fscanf(fp, "%s", mem[i].id);
+      fscanf(fp, "%s", mem[i].pw);
+      fscanf(fp, "%d", mem[i].state);
+   }
+   fclose(fp);
+   //아이디 패스워드를 id_in, pw_in에 받고
+   for (i = 0; i < n / 3; i++)
+   {
+      if (strcmp(mem[i].id,id_in))
+         if (strcmp(mem[i].pw, pw_in))
+         {
+            mem[i].state = 1;
+            //로그인 성공 메시지를 보냄
+            break;
+         }
+   }
 }
 
