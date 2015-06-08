@@ -27,6 +27,7 @@ int main(int argc,char* argv[])
  void* thread_return;
  char id[10];
  char pw[10];
+ char login[10];
  if(argc!=4)
  {
   printf("Useage: %s <IP> <PORT> <NAME>\n",argv[0]);
@@ -50,12 +51,23 @@ printf("비밀번호 입력하시오");
 fgets(pw, 10, stdin);
  write(sock,pw,strlen(pw));
 
- pthread_create(&snd_thread, NULL, send_msg,(void*)&sock);
- pthread_create(&rcv_thread, NULL,recv_msg,(void*)&sock);
- pthread_join(snd_thread,&thread_return);
- pthread_join(rcv_thread,&thread_return);
- close(sock);
- return 0;
+ fflush(stdin);
+ read(sock,login,strlen(login));
+  if(login[0]=='1')
+ {
+  printf("login success\n");
+  pthread_create(&snd_thread, NULL, send_msg,(void*)&sock);
+  pthread_create(&rcv_thread, NULL,recv_msg,(void*)&sock);
+  pthread_join(snd_thread,&thread_return);
+  pthread_join(rcv_thread,&thread_return);
+  close(sock);
+  return 0;
+ }
+ else
+ {
+   printf("login fail\n");
+   exit(1);
+ }
 }
 void* send_msg(void* arg)
 {

@@ -13,7 +13,7 @@
 void * handle_clnt(void* arg);
 void send_msg(char* msg,int len);
 void error_handling(char* msg);
-void login(char id_in[20],char pw_in[20]);
+void login(char id_in[20],char pw_in[20],int sock);
 
 
 //char idpw[20]="input id, pw";   
@@ -66,7 +66,7 @@ int main(int argc,char* argv[])
   
 
 
-  login(id_in,pw_in);
+  login(id_in,pw_in,clnt_sock);
   
 
 
@@ -121,7 +121,7 @@ void error_handling(char* message)
  fputc('\n',stderr);
  exit(1);
 }
-void login(char id_in[20],char pw_in[20])
+void login(char id_in[20],char pw_in[20],int sock)
 {//printf("a");
 struct
 {
@@ -134,6 +134,7 @@ struct
    int n=0;
    int i;
    char a[15];
+   char state[10];
    member *mem;
 
    fp=fopen("data.txt", "r");
@@ -173,23 +174,25 @@ struct
    for (i = 0; i < n / 3; i++)
    {
       if (strcmp(mem[i].id,id_in)==0){
- 	printf("access");      
+ 	    
 	  if (strcmp(mem[i].pw, pw_in)==0)
          {
             mem[i].state = 1;
-            printf("로그인 성공");
+	    state[0]='1';
+            write(sock,state,sizeof(state));
             break;
          }
 	 else
          {
-           printf("login fail");
-	   exit(1);
+           state[0]='0';
+           write(sock,state,sizeof(state));
          }
        }
 	else
        {
-         printf("login fail");
-         exit(1);
+	state[0]='0';
+         write(sock,state,sizeof(state));
+       //  exit(1);
        }
    }
 
