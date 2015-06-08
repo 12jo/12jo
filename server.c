@@ -62,13 +62,13 @@ int main(int argc,char* argv[])
 return 0;
 } 
 
-void* handle_clnt(void *arg)
+void * handle_clnt(void *arg)
 {
  int clnt_sock=*((int*)arg);
  int str_len=0, i;
  char msg[BUF_SIZE];
 
- while((str_len=read(clnt_sock, msg,sizeof(msg))!=0)
+ while((str_len=read(clnt_sock, msg,sizeof(msg)))!=0)
   send_msg(msg,str_len);
  
  pthread_mutex_lock(&mutx);
@@ -76,9 +76,9 @@ void* handle_clnt(void *arg)
  {
   if(clnt_sock==clnt_socks[i])
   {
-   while(i++<clnt_cnt-1)
-    clnt_socks[i]=clnt_socks[i+1];
-   break;
+    while(i++<clnt_cnt-1)
+      clnt_socks[i]=clnt_socks[i+1];
+    break;
   }
  }
  clnt_cnt--;

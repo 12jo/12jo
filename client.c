@@ -10,9 +10,9 @@
 #define BUF_SIZE 100
 #define NAME_SIZE 20
 
-void error_handling(char* message)
-void *send_msg(void *arg);
-void *recv_msg(void *arg);
+void error_handling(char* msg);
+void * send_msg(void *arg);
+void * recv_msg(void *arg);
 
 
 char name[NAME_SIZE]="[DEFAULT]";
@@ -22,8 +22,6 @@ char msg[BUF_SIZE];
 int main(int argc,char* argv[])
 {
  int sock;
-// int clnt_sock;
- int str_len,i;
  struct sockaddr_in serv_addr;
  pthread_t snd_thread, rcv_thread;
  void* thread_return;
@@ -33,14 +31,8 @@ int main(int argc,char* argv[])
   printf("Useage: %s <IP> <PORT> <NAME>\n",argv[0]);
   exit(1);
  }
-
- if(argc!=2)
- {
-  printf("useage:%s <port> ,argv[0]");
-  exit(1);
- }
-
- serv_sock=socket(AF_INET,SOCK_STREAM,0);
+ sprintf(name, "[%s]",argv[3]);
+ sock=socket(PF_INET,SOCK_STREAM,0);
  
  memset(&serv_addr, 0, sizeof(serv_addr));
  serv_addr.sin_family=AF_INET;
@@ -48,7 +40,7 @@ int main(int argc,char* argv[])
  serv_addr.sin_port=htons(atoi(argv[2]));
  
  if(connect(sock, (struct sockaddr*)&serv_addr, sizeof(serv_addr))==-1)
-  error_handling("connect(0 error")
+  error_handling("connect() error");
 
  pthread_create(&snd_thread, NULL, send_msg,(void*)&sock);
  pthread_create(&rcv_thread, NULL,recv_msg,(void*)&sock);
@@ -60,18 +52,33 @@ int main(int argc,char* argv[])
 void* send_msg(void* arg)
 {
  int sock=*((int*)arg);
- char name_msg[NAME_SIZE+BUF_SIE];
+ char name_msg[NAME_SIZE+BUF_SIZE];
  while(1)
  {
   fgets(msg, BUF_SIZE, stdin);
-  sprintf(name_msg,"%s %s",name, msg);
+  sprintf(name_msg,"%s %s",name,msg);
   write(sock,name_msg,strlen(name_msg));
  }
  return NULL;
 }
-void error_handling(char* message)
+void* recv_msg(void* arg)
 {
- fputs(message, stderr);
+ int sock=*((int*)arg);
+ char name_msg[NAME_SIZE+BUF_SIZE];
+ int str_len;
+ while(1)
+ {
+  str_len=read(sock, name_msg, NAME_SIZE+BUF_SIZE-1);
+  if(str_len==-1)
+   return (void*) -1;
+ name_msg[str_len]=0;
+ fputs(name_msg, stdout);
+ }
+ return NULL;
+}
+void error_handling(char* msg)
+{
+ fputs(msg, stderr);
  fputc('\n', stderr);
  exit(1);
 }
